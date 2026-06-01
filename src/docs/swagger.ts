@@ -18,8 +18,8 @@ const options: swaggerJsdoc.Options = {
       {
         url:
           process.env.NODE_ENV === "production"
-            ? "http://localhost:3000/api"
-            : "",
+            ? "https://sistema-asistencia-api-3cjq.onrender.com/api"
+            : "http://localhost:3000/api",
       },
     ],
 
