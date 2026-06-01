@@ -11,7 +11,7 @@ Node.js + TypeScript + PostgreSQL (local) para la Carrera de Medicina.
 Abre **pgAdmin** o **psql** y ejecuta:
 
 ```sql
-CREATE DATABASE attendance_db;
+CREATE DATABASE sistema_asistencia_BD;
 ```
 
 ### Paso 2 — Clonar / copiar el proyecto y configurar variables

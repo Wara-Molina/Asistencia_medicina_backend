@@ -115,13 +115,9 @@ async function bootstrap() {
 
   iniciarJobs();
 
-  app.listen(
-    PORT,
-
-    () => {
-      console.log(`Servidor en puerto ${PORT}`);
-    },
-  );
+  app.listen(PORT, "0.0.0.0", () => {
+    console.log(`Servidor ejecutándose en puerto ${PORT}`);
+  });
 }
 
 if (process.env.NODE_ENV !== "test") {
