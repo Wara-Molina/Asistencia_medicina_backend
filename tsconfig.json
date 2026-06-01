@@ -6,7 +6,7 @@
 
     "lib": ["ES2020"],
 
-    "types": ["node", "jest"],
+    "types": ["node"],
 
     "outDir": "./dist",
 
