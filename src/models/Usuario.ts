@@ -67,6 +67,8 @@ export class Usuario {
     type: "timestamptz",
     nullable: true,
   })
+  fechaBloqueo!: Date | null;
+
   @Column({
     name: "reset_token",
     type: "varchar",
