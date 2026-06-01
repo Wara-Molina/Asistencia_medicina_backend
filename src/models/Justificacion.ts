@@ -12,12 +12,12 @@ export enum JustificacionEstado {
   APROBADA = "aprobada",
   RECHAZADA = "rechazada",
 }
-export enum JustificacionTipo {
-  TARDANZA = "tardanza",
-  AUSENCIA = "ausencia",
-  ABANDONO = "abandono",
-  SALIDA_ANTICIPADA = "salida_anticipada",
-}
+// export enum JustificacionTipo {
+//   TARDANZA = "tardanza",
+//   AUSENCIA = "ausencia",
+//   ABANDONO = "abandono",
+//   SALIDA_ANTICIPADA = "salida_anticipada",
+// }
 
 @Entity("justificaciones")
 export class Justificacion {
@@ -55,11 +55,11 @@ export class Justificacion {
   })
   estado!: JustificacionEstado;
 
-  @Column({
-    type: "enum",
-    enum: JustificacionTipo,
-  })
-  tipo!: JustificacionTipo;
+  // @Column({
+  //   type: "enum",
+  //   enum: JustificacionTipo,
+  // })
+  // tipo!: JustificacionTipo;
 
   @Column({
     type: "text",

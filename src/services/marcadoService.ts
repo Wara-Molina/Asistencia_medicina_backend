@@ -22,12 +22,12 @@ import { AuditService } from "./auditService";
 import { AppDataSource } from "../config/database";
 
 import { Ubicacion, UbicacionTipo } from "../models/Ubicacion";
-
+import { LocationValidationService } from "./locationValidationService";
 export class MarcadoService {
   private repository = new MarcadoRepository();
 
   private validationService = new ValidationService();
-
+  private locationService = new LocationValidationService();
   private auditService = new AuditService();
 
   private ubicacionRepo = AppDataSource.getRepository(Ubicacion);
@@ -109,19 +109,33 @@ export class MarcadoService {
           throw new AppError(400, "GPS_REQUERIDO", "Hospital requiere GPS");
         }
 
-        const esValido = this.validationService.validarHospital(
-          {
-            latitud: body.latitud,
+        const esValido = await this.locationService.validarDistancia(
+          ubicacion.id,
 
-            longitud: body.longitud,
-          } as any,
+          body.latitud,
 
-          ubicacion,
+          body.longitud,
+        );
+
+        const distancia = await this.locationService.distanciaMetros(
+          ubicacion.id,
+
+          body.latitud,
+
+          body.longitud,
         );
 
         estado = esValido ? MarcadoEstado.VALIDO : MarcadoEstado.RECHAZADO;
-      } else {
-        estado = MarcadoEstado.VALIDO;
+
+        if (!esValido) {
+          throw new AppError(
+            400,
+
+            "FUERA_DE_RANGO",
+
+            `Fuera del radio permitido (${Math.round(distancia)}m)`,
+          );
+        }
       }
     }
 
@@ -270,11 +284,17 @@ export class MarcadoService {
       if (horario) {
         const [horaFin, minutoFin] = horario.horaFin.split(":").map(Number);
 
+        if (!actual.horaInicio) {
+          throw new AppError(
+            400,
+            "SIN_HORA_ENTRADA",
+            "El marcado no tiene hora de entrada",
+          );
+        }
+
         const salidaProgramada = new Date(actual.horaInicio);
 
-        salidaProgramada.setHours(horaFin, minutoFin, 0, 0);
-
-        /* CRUCE DE DÍA */
+        salidaProgramada.setHours(salidaProgramada.getHours() + 4);
 
         const horaEntrada = new Date(actual.horaInicio).getHours();
 

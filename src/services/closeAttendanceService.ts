@@ -22,6 +22,10 @@ export class CloseAttendanceService {
 
       marcado.estado = MarcadoEstado.POSIBLE_ABANDONO;
 
+      if (!marcado.horaInicio) {
+        continue;
+      }
+
       const inicio = new Date(marcado.horaInicio);
 
       const fin = new Date(marcado.horaFin);

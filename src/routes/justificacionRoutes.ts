@@ -9,7 +9,9 @@ import {
   rechazarJustificacion,
 } from "../controllers/justificacionController";
 
-import { autenticar } from "../middlewares/auth";
+import { autenticar, autorizar } from "../middlewares/auth";
+
+import { UsuarioRol } from "../models/Usuario";
 
 const router = Router();
 
@@ -22,11 +24,23 @@ router.get("/", autenticar, obtenerJustificaciones);
 router.post("/", autenticar, crearJustificacion);
 
 // aprobar
+router.patch(
+  "/:id/aprobar",
 
-router.patch("/:id/aprobar", autenticar, aprobarJustificacion);
+  autenticar,
 
-// rechazar
+  autorizar(UsuarioRol.ADMIN, UsuarioRol.DIRECTOR),
 
-router.patch("/:id/rechazar", autenticar, rechazarJustificacion);
+  aprobarJustificacion,
+);
 
+router.patch(
+  "/:id/rechazar",
+
+  autenticar,
+
+  autorizar(UsuarioRol.ADMIN, UsuarioRol.DIRECTOR),
+
+  rechazarJustificacion,
+);
 export default router;

@@ -18,6 +18,13 @@ export class PdfExportService {
   private justificacionRepo = AppDataSource.getRepository(Justificacion);
 
   async generarPdf(): Promise<Buffer> {
+    const marcados = await this.marcadoRepo.find({
+      relations: {
+        docente: true,
+        ubicacion: true,
+      },
+    });
+
     const presentes = await this.marcadoRepo.countBy({
       estadoAsistencia: AsistenciaEstado.PRESENTE,
     });
@@ -34,29 +41,29 @@ export class PdfExportService {
       estado: JustificacionEstado.APROBADA,
     });
 
-    const doc = new PDFDocument();
+    const doc = new PDFDocument({
+      margin: 50,
+    });
 
     const buffers: Buffer[] = [];
 
-    doc.on(
-      "data",
+    doc.on("data", buffers.push.bind(buffers));
 
-      buffers.push.bind(buffers),
-    );
+    doc.fontSize(18);
 
-    doc.on(
-      "end",
+    doc.text("FACULTAD DE MEDICINA", {
+      align: "center",
+    });
 
-      () => {},
-    );
+    doc.moveDown();
 
-    doc.fontSize(20);
+    doc.fontSize(15);
 
     doc.text("REPORTE GENERAL DE ASISTENCIA");
 
     doc.moveDown();
 
-    doc.fontSize(14);
+    doc.fontSize(12);
 
     doc.text(`Presentes: ${presentes}`);
 
@@ -69,6 +76,22 @@ export class PdfExportService {
     doc.moveDown();
 
     doc.text(`Generado: ${new Date().toISOString()}`);
+
+    doc.moveDown();
+
+    doc.fontSize(14);
+
+    doc.text("DETALLE DOCENTES");
+
+    doc.moveDown();
+
+    for (const item of marcados) {
+      doc.fontSize(10);
+
+      doc.text(
+        `${item.docente?.nombreCompleto ?? "-"} | ${item.fecha} | ${item.estadoAsistencia ?? "-"} | ${item.ubicacion?.nombre ?? "-"}`,
+      );
+    }
 
     doc.end();
 

@@ -62,7 +62,11 @@ export class Usuario {
     default: false,
   })
   bloqueado!: boolean;
-
+  @Column({
+    name: "fecha_bloqueo",
+    type: "timestamptz",
+    nullable: true,
+  })
   @Column({
     name: "reset_token",
     type: "varchar",

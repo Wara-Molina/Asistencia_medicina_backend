@@ -1,4 +1,4 @@
-/** src/seeds/index.ts */
+// src/seeds/index.ts
 
 import "reflect-metadata";
 
@@ -91,9 +91,9 @@ async function seed() {
 
   if (!docente) {
     docente = dRepo.create({
-      nombreCompleto: "Dr. Carlos Mendoza",
+      nombreCompleto: "Dr. Jorge Mendoza",
 
-      email: "c.mendoza@medicina.edu.bo",
+      email: "j.mendoza@medicina.edu.bo",
 
       cedula: "1234567",
 
@@ -118,7 +118,64 @@ async function seed() {
       }),
     );
   }
+  let docente2 = await dRepo.findOneBy({
+    cedula: "7654321",
+  });
 
+  if (!docente2) {
+    docente2 = await dRepo.save(
+      dRepo.create({
+        nombreCompleto: "Dra. Maria Lopez",
+        email: "m.lopez@medicina.edu.bo",
+        cedula: "7654321",
+        departamento: "Fisiologia",
+      }),
+    );
+
+    await uRepo.save(
+      uRepo.create({
+        email: docente2.email,
+        password: await hashPassword(docente2.cedula),
+        rol: UsuarioRol.DOCENTE,
+        docenteId: docente2.id,
+        nombreCompleto: docente2.nombreCompleto,
+        activo: true,
+        bloqueado: false,
+        intentosFallidos: 0,
+        primerLogin: false,
+        debeCambiarPassword: false,
+      }),
+    );
+  }
+  let docente3 = await dRepo.findOneBy({
+    cedula: "9876543",
+  });
+
+  if (!docente3) {
+    docente3 = await dRepo.save(
+      dRepo.create({
+        nombreCompleto: "Dr. Juan Rojas",
+        email: "j.rojas@medicina.edu.bo",
+        cedula: "9876543",
+        departamento: "Cirugia",
+      }),
+    );
+
+    await uRepo.save(
+      uRepo.create({
+        email: docente3.email,
+        password: await hashPassword(docente3.cedula),
+        rol: UsuarioRol.DOCENTE,
+        docenteId: docente3.id,
+        nombreCompleto: docente3.nombreCompleto,
+        activo: true,
+        bloqueado: false,
+        intentosFallidos: 0,
+        primerLogin: false,
+        debeCambiarPassword: false,
+      }),
+    );
+  }
   // HOSPITAL
 
   let hospital = await lRepo.findOneBy({
@@ -143,6 +200,42 @@ async function seed() {
     console.log("✅ Hospital creado");
   }
 
+  ///
+  const ubicaciones = [
+    {
+      nombre: "Laboratorio Anatomia",
+      tipo: UbicacionTipo.LABORATORIO,
+    },
+    {
+      nombre: "Laboratorio Fisiologia",
+      tipo: UbicacionTipo.LABORATORIO,
+    },
+    {
+      nombre: "Aula 101",
+      tipo: UbicacionTipo.AULA,
+    },
+    {
+      nombre: "Aula 202",
+      tipo: UbicacionTipo.AULA,
+    },
+  ];
+
+  for (const item of ubicaciones) {
+    const existe = await lRepo.findOneBy({
+      nombre: item.nombre,
+    });
+
+    if (!existe) {
+      await lRepo.save(
+        lRepo.create({
+          nombre: item.nombre,
+          tipo: item.tipo,
+          radioValidacion: 300,
+        }),
+      );
+    }
+  }
+
   // MATERIA
 
   let materia: Materia | null = await mRepo.findOneBy({
@@ -165,6 +258,37 @@ async function seed() {
     materia = await mRepo.save(nuevaMateria);
 
     console.log("✅ Materia creada");
+  }
+  const materia2Existe = await mRepo.findOneBy({
+    codigo: "MED102",
+  });
+
+  if (!materia2Existe) {
+    await mRepo.save(
+      mRepo.create({
+        nombre: "Fisiologia",
+        codigo: "MED102",
+        creditos: 5,
+        semestre: 2,
+        estado: MateriaEstado.ACTIVO,
+      }),
+    );
+  }
+
+  const materia3Existe = await mRepo.findOneBy({
+    codigo: "MED201",
+  });
+
+  if (!materia3Existe) {
+    await mRepo.save(
+      mRepo.create({
+        nombre: "Cirugia General",
+        codigo: "MED201",
+        creditos: 6,
+        semestre: 4,
+        estado: MateriaEstado.ACTIVO,
+      }),
+    );
   }
 
   // PARALELO

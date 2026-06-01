@@ -86,3 +86,49 @@ export async function resetPassword(
     timestamp: new Date().toISOString(),
   });
 }
+export async function obtenerUsuarios(
+  _req: Request,
+  res: Response,
+): Promise<void> {
+  const usuarios = await userService.obtenerTodos();
+
+  res.json({
+    status: "success",
+    data: usuarios,
+    timestamp: new Date().toISOString(),
+  });
+}
+export async function bloquearUsuario(
+  req: Request,
+  res: Response,
+): Promise<void> {
+  await userService.bloquearUsuario(req.params.id);
+
+  res.json({
+    status: "success",
+    message: "Usuario bloqueado",
+  });
+}
+export async function desbloquearUsuario(
+  req: Request,
+  res: Response,
+): Promise<void> {
+  await userService.desbloquearUsuario(req.params.id);
+
+  res.json({
+    status: "success",
+    message: "Usuario desbloqueado",
+  });
+}
+export async function obtenerUsuarioPorId(
+  req: Request,
+  res: Response,
+): Promise<void> {
+  const usuario = await userService.obtenerPorId(req.params.id);
+
+  res.json({
+    status: "success",
+    data: usuario,
+    timestamp: new Date().toISOString(),
+  });
+}

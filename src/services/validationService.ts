@@ -1,49 +1,16 @@
 // src/services/validationService.ts
 
 import { Marcado, MarcadoEstado } from "../models/Marcado";
-
 import { Ubicacion } from "../models/Ubicacion";
 
-import { GeoService } from "./geoService";
-
 export class ValidationService {
-  private geoService = new GeoService();
-
-  validarHospital(marcado: Partial<Marcado>, ubicacion: Ubicacion): boolean {
-    if (marcado.latitud == null || marcado.longitud == null) {
-      return false;
-    }
-
-    if (ubicacion.latitud == null || ubicacion.longitud == null) {
-      return false;
-    }
-
-    const valido = this.geoService.validarRadio(
-      Number(marcado.latitud),
-
-      Number(marcado.longitud),
-
-      Number(ubicacion.latitud),
-
-      Number(ubicacion.longitud),
-
-      ubicacion.radioValidacion,
-    );
-
-    return valido;
-  }
-
-  validarCampus(): MarcadoEstado {
-    return MarcadoEstado.VALIDO;
-  }
-
-  validarLaboratorio(): MarcadoEstado {
-    return MarcadoEstado.VALIDO;
-  }
-
   detectarAbandono(marcado: Marcado, limiteMinutos = 120): MarcadoEstado {
     if (marcado.horaFin) {
       return MarcadoEstado.VALIDO;
+    }
+
+    if (!marcado.horaInicio) {
+      return MarcadoEstado.RECHAZADO;
     }
 
     const inicio = new Date(marcado.horaInicio);
@@ -57,5 +24,56 @@ export class ValidationService {
     }
 
     return MarcadoEstado.VALIDANDO;
+  }
+
+  // VALIDAR GPS HOSPITAL
+  validarHospital(
+    gps: {
+      latitud: number;
+      longitud: number;
+    },
+    ubicacion: Ubicacion,
+  ): boolean {
+    if (
+      ubicacion.latitud == null ||
+      ubicacion.longitud == null ||
+      ubicacion.radioValidacion == null
+    ) {
+      return false;
+    }
+
+    const distancia = this.calcularDistancia(
+      gps.latitud,
+      gps.longitud,
+
+      Number(ubicacion.latitud),
+      Number(ubicacion.longitud),
+    );
+
+    return distancia <= ubicacion.radioValidacion;
+  }
+
+  private calcularDistancia(
+    lat1: number,
+    lon1: number,
+    lat2: number,
+    lon2: number,
+  ): number {
+    const R = 6371000;
+
+    const dLat = ((lat2 - lat1) * Math.PI) / 180;
+
+    const dLon = ((lon2 - lon1) * Math.PI) / 180;
+
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos((lat1 * Math.PI) / 180) *
+        Math.cos((lat2 * Math.PI) / 180) *
+        Math.sin(dLon / 2) *
+        Math.sin(dLon / 2);
+
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+    return R * c;
   }
 }

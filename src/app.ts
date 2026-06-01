@@ -28,11 +28,11 @@ import {
   sesionesRouter,
   ausenciasRouter,
   cierresRouter,
-  justificacionesRouter,
 } from "./routes/index";
 import { iniciarJobs } from "./jobs/attendanceJobs";
+import observacionRoutes from "./routes/observacionRoutes";
 import swaggerUi from "swagger-ui-express";
-
+import syncRoutes from "./routes/syncRoutes";
 import { swaggerSpec } from "./docs/swagger";
 
 const app = express();
@@ -94,8 +94,9 @@ app.use(`${PREFIX}/usuarios`, usuariosRouter);
 app.use(`${PREFIX}/sesiones`, sesionesRouter);
 app.use(`${PREFIX}/ausencias`, ausenciasRouter);
 app.use(`${PREFIX}/cierres`, cierresRouter);
+app.use(`${PREFIX}/sync`, syncRoutes);
 app.use("/api/justificaciones", justificacionRoutes);
-app.use(`${PREFIX}/justificaciones`, justificacionesRouter);
+app.use(`${PREFIX}/observaciones`, observacionRoutes);
 // ─── 404 ─────────────────────────────────────────────────────────────────────
 app.use((_req, res) => {
   res.status(404).json({

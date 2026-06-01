@@ -100,4 +100,37 @@ export class UserService {
       },
     );
   }
+
+  async obtenerTodos() {
+    return this.repository.findAll();
+  }
+
+  async bloquearUsuario(id: string) {
+    const usuario = await this.repository.findById(id);
+
+    if (!usuario) {
+      throw new AppError(404, "USUARIO_NO_ENCONTRADO", "Usuario no encontrado");
+    }
+
+    await this.repository.bloquear(id);
+  }
+
+  async desbloquearUsuario(id: string) {
+    const usuario = await this.repository.findById(id);
+
+    if (!usuario) {
+      throw new AppError(404, "USUARIO_NO_ENCONTRADO", "Usuario no encontrado");
+    }
+
+    await this.repository.desbloquear(id);
+  }
+  async obtenerPorId(id: string) {
+    const usuario = await this.repository.findById(id);
+
+    if (!usuario) {
+      throw new AppError(404, "USUARIO_NO_ENCONTRADO", "Usuario no encontrado");
+    }
+
+    return usuario;
+  }
 }

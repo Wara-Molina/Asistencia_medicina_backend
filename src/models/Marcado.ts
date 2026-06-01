@@ -17,6 +17,7 @@ export enum TipoMarcado {
   APP_CAMPUS = "app_campus",
   APP_LABORATORIO = "app_laboratorio",
   APP_HOSPITAL = "app_hospital",
+  AUTOMATICO = "automatico",
 }
 
 export enum MarcadoEstado {
@@ -56,8 +57,13 @@ export class Marcado {
   @Column({ type: "date" })
   fecha!: string;
 
-  @Column({ name: "hora_inicio", type: "timestamptz" })
-  horaInicio!: Date;
+  @Column({
+    name: "hora_inicio",
+    type: "timestamptz",
+
+    nullable: true,
+  })
+  horaInicio!: Date | null;
 
   @Column({ name: "hora_fin", type: "timestamptz", nullable: true })
   horaFin!: Date | null;
@@ -87,6 +93,27 @@ export class Marcado {
 
   @Column({ name: "sincronizado_offline", type: "boolean", default: false })
   sincronizadoOffline!: boolean;
+  @Column({
+    name: "offline_id",
+    type: "varchar",
+    length: 100,
+    nullable: true,
+  })
+  offlineId!: string | null;
+
+  @Column({
+    name: "fecha_dispositivo",
+    type: "timestamptz",
+    nullable: true,
+  })
+  fechaDispositivo!: Date | null;
+
+  @Column({
+    name: "justificado",
+    type: "boolean",
+    default: false,
+  })
+  justificado!: boolean;
 
   @CreateDateColumn({ name: "fecha_creacion" })
   fechaCreacion!: Date;
@@ -121,14 +148,14 @@ export class Marcado {
 
   @Column({
     name: "minutos_retraso",
-
+    type: "integer",
     default: 0,
   })
   minutosRetraso!: number;
 
   @Column({
     name: "minutos_trabajados",
-
+    type: "integer",
     default: 0,
   })
   minutosTrabajados!: number;

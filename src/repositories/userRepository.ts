@@ -66,4 +66,40 @@ export class UserRepository {
       resetToken: token,
     });
   }
+  async findAll(): Promise<Usuario[]> {
+    return this.repo.find({
+      select: {
+        id: true,
+        email: true,
+        rol: true,
+        docenteId: true,
+        nombreCompleto: true,
+        activo: true,
+        debeCambiarPassword: true,
+        primerLogin: true,
+        intentosFallidos: true,
+        bloqueado: true,
+        ultimoAcceso: true,
+        fechaCreacion: true,
+        fechaActualizacion: true,
+      },
+
+      order: {
+        fechaCreacion: "DESC",
+      },
+    });
+  }
+
+  async desbloquear(id: string): Promise<void> {
+    await this.repo.update(id, {
+      bloqueado: false,
+      intentosFallidos: 0,
+    });
+  }
+
+  async create(data: Partial<Usuario>): Promise<Usuario> {
+    const usuario = this.repo.create(data);
+
+    return this.repo.save(usuario);
+  }
 }

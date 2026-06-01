@@ -3,8 +3,9 @@
 import {
   Justificacion,
   JustificacionEstado,
-  JustificacionTipo,
+  // JustificacionTipo,
 } from "../models/Justificacion";
+import { AsistenciaEstado } from "../models/Marcado";
 
 import { JustificacionRepository } from "../repositories/justificacionRepository";
 
@@ -26,7 +27,7 @@ export class JustificacionService {
 
     docenteId: string;
 
-    tipo: JustificacionTipo;
+    // tipo: JustificacionTipo;
 
     motivo: string;
 
@@ -37,13 +38,34 @@ export class JustificacionService {
     if (!marcado) {
       throw new AppError(404, "MARCADO_NO_ENCONTRADO", "Marcado inexistente");
     }
+    if (marcado.docenteId !== data.docenteId) {
+      throw new AppError(
+        403,
+        "MARCADO_NO_PERTENECE_DOCENTE",
+        "No puede justificar registros de otro docente",
+      );
+    }
+    if (marcado.estadoAsistencia === AsistenciaEstado.PRESENTE) {
+      throw new AppError(
+        400,
+        "JUSTIFICACION_NO_PERMITIDA",
+        "No se puede justificar una asistencia registrada como PRESENTE",
+      );
+    }
+    if (marcado.justificado) {
+      throw new AppError(
+        400,
+        "YA_JUSTIFICADO",
+        "Este marcado ya tiene una justificación aprobada",
+      );
+    }
 
     return this.repo.create({
       marcadoId: data.marcadoId,
 
       docenteId: data.docenteId,
 
-      tipo: data.tipo,
+      // tipo: data.tipo,
 
       motivo: data.motivo,
 
@@ -64,11 +86,27 @@ export class JustificacionService {
       throw new AppError(404, "JUSTIFICACION_NO_ENCONTRADA", "No encontrada");
     }
 
+    if (item.estado !== JustificacionEstado.PENDIENTE) {
+      throw new AppError(
+        400,
+        "JUSTIFICACION_YA_PROCESADA",
+        "La justificación ya fue revisada",
+      );
+    }
+
     item.estado = JustificacionEstado.APROBADA;
 
     item.observaciones = observaciones ?? null;
 
     item.fechaRevision = new Date();
+
+    const marcado = await this.marcadoRepo.findById(item.marcadoId);
+
+    if (marcado) {
+      marcado.justificado = true;
+
+      await this.marcadoRepo.save(marcado);
+    }
 
     const actualizado = await this.repo.save(item);
 
@@ -80,6 +118,14 @@ export class JustificacionService {
 
     if (!item) {
       throw new AppError(404, "JUSTIFICACION_NO_ENCONTRADA", "No encontrada");
+    }
+
+    if (item.estado !== JustificacionEstado.PENDIENTE) {
+      throw new AppError(
+        400,
+        "JUSTIFICACION_YA_PROCESADA",
+        "La justificación ya fue revisada",
+      );
     }
 
     item.estado = JustificacionEstado.RECHAZADA;

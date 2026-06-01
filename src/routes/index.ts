@@ -59,7 +59,11 @@ import { getAuditoria } from "../controllers/auditController";
 import {
   cambiarPassword,
   solicitarResetPassword,
+  obtenerUsuarioPorId,
   resetPassword,
+  obtenerUsuarios,
+  bloquearUsuario,
+  desbloquearUsuario,
 } from "../controllers/userController";
 
 import {
@@ -257,16 +261,31 @@ auditoriaRouter.get(
 );
 
 // ─── Cambiar Password ─────────────────────────────
+
 export const usuariosRouter = Router();
 
 usuariosRouter.use(autenticar);
 
-usuariosRouter.put(
-  "/password",
-
-  cambiarPassword,
+usuariosRouter.get(
+  "/",
+  autorizar(UsuarioRol.ADMIN, UsuarioRol.DIRECTOR),
+  obtenerUsuarios,
 );
 
+usuariosRouter.patch(
+  "/:id/bloquear",
+  autorizar(UsuarioRol.ADMIN),
+  bloquearUsuario,
+);
+
+usuariosRouter.patch(
+  "/:id/desbloquear",
+  autorizar(UsuarioRol.ADMIN),
+  desbloquearUsuario,
+);
+
+usuariosRouter.put("/password", cambiarPassword);
+///   completar usuarios-----------------------------------
 // ─── Sesiones ─────────────────────────────
 export const sesionesRouter = Router();
 
@@ -319,6 +338,19 @@ justificacionesRouter.get("/", obtenerJustificaciones);
 
 justificacionesRouter.post("/", crearJustificacion);
 
-justificacionesRouter.patch("/:id/aprobar", aprobarJustificacion);
+justificacionesRouter.patch(
+  "/:id/aprobar",
 
-justificacionesRouter.patch("/:id/rechazar", rechazarJustificacion);
+  autorizar(UsuarioRol.ADMIN, UsuarioRol.DIRECTOR),
+
+  aprobarJustificacion,
+);
+
+justificacionesRouter.patch(
+  "/:id/rechazar",
+
+  autorizar(UsuarioRol.ADMIN, UsuarioRol.DIRECTOR),
+
+  rechazarJustificacion,
+);
+//-------------- usuarios

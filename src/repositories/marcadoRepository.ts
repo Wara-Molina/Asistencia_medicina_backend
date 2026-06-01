@@ -54,6 +54,9 @@ export class MarcadoRepository {
     return this.repository.save(marcado);
   }
 
+  async save(marcado: Marcado): Promise<Marcado> {
+    return this.repository.save(marcado);
+  }
   async update(id: string, data: Partial<Marcado>): Promise<Marcado | null> {
     const marcado = await this.findById(id);
 

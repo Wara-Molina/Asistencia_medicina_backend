@@ -11,6 +11,10 @@ export class ReportService {
 
   private justificacionRepo = AppDataSource.getRepository(Justificacion);
 
+  // =====================================
+  // RESUMEN GENERAL
+  // =====================================
+
   async resumenGeneral() {
     const presentes = await this.marcadoRepo.countBy({
       estadoAsistencia: AsistenciaEstado.PRESENTE,
@@ -34,12 +38,20 @@ export class ReportService {
 
     return {
       presentes,
+
       ausentes,
+
       tardanzas,
+
       abandono,
+
       justificadas,
     };
   }
+
+  // =====================================
+  // REPORTE DOCENTE
+  // =====================================
 
   async reporteDocente(docenteId: string) {
     const marcados = await this.marcadoRepo.findBy({
@@ -86,9 +98,15 @@ export class ReportService {
 
       horasTrabajadas,
 
+      totalMarcados: total,
+
       porcentajeAsistencia: porcentaje,
     };
   }
+
+  // =====================================
+  // RANKING DOCENTES
+  // =====================================
 
   async rankingDocentes() {
     const marcados = await this.marcadoRepo.find({
@@ -101,7 +119,9 @@ export class ReportService {
       string,
       {
         nombre: string;
+
         total: number;
+
         presentes: number;
       }
     >();
@@ -136,139 +156,61 @@ export class ReportService {
       }
     }
 
-    return Array.from(mapa.values())
+    const ranking = Array.from(mapa.entries()).map(([id, value]) => ({
+      docenteId: id,
 
-      .map((x) => ({
-        docente: x.nombre,
+      nombre: value.nombre,
 
-        porcentaje:
-          x.total === 0
-            ? 0
-            : Number(((x.presentes / x.total) * 100).toFixed(2)),
-      }))
+      total: value.total,
 
-      .sort((a, b) => b.porcentaje - a.porcentaje);
+      presentes: value.presentes,
+
+      porcentaje:
+        value.total === 0
+          ? 0
+          : Number(((value.presentes / value.total) * 100).toFixed(2)),
+    }));
+
+    ranking.sort((a, b) => b.porcentaje - a.porcentaje);
+
+    return ranking;
   }
 
-  async topAusencias() {
-    const marcados = await this.marcadoRepo.find({
-      relations: {
-        docente: true,
-      },
-    });
-
-    const mapa = new Map<
-      string,
-      {
-        docente: string;
-        cantidad: number;
-      }
-    >();
-
-    for (const item of marcados) {
-      if (item.estadoAsistencia !== AsistenciaEstado.AUSENTE) {
-        continue;
-      }
-
-      if (!item.docente) {
-        continue;
-      }
-
-      const id = item.docente.id;
-
-      if (!mapa.has(id)) {
-        mapa.set(
-          id,
-
-          {
-            docente: item.docente.nombreCompleto,
-
-            cantidad: 0,
-          },
-        );
-      }
-
-      mapa.get(id)!.cantidad++;
-    }
-
-    return Array.from(mapa.values())
-
-      .sort((a, b) => b.cantidad - a.cantidad);
-  }
-
-  async topTardanzas() {
-    const marcados = await this.marcadoRepo.find({
-      relations: {
-        docente: true,
-      },
-    });
-
-    const mapa = new Map<
-      string,
-      {
-        docente: string;
-        cantidad: number;
-      }
-    >();
-
-    for (const item of marcados) {
-      if (item.estadoAsistencia !== AsistenciaEstado.TARDANZA) {
-        continue;
-      }
-
-      if (!item.docente) {
-        continue;
-      }
-
-      const id = item.docente.id;
-
-      if (!mapa.has(id)) {
-        mapa.set(
-          id,
-
-          {
-            docente: item.docente.nombreCompleto,
-
-            cantidad: 0,
-          },
-        );
-      }
-
-      mapa.get(id)!.cantidad++;
-    }
-
-    return Array.from(mapa.values())
-
-      .sort((a, b) => b.cantidad - a.cantidad);
-  }
+  // =====================================
+  // DASHBOARD DIRECTOR
+  // =====================================
 
   async dashboardDirector() {
     const resumen = await this.resumenGeneral();
 
-    const topAusencias = await this.topAusencias();
-
-    const topTardanzas = await this.topTardanzas();
-
     const ranking = await this.rankingDocentes();
 
-    const riesgo = ranking.filter((x) => x.porcentaje < 70);
+    const pendientes = await this.justificacionRepo.countBy({
+      estado: JustificacionEstado.PENDIENTE,
+    });
+
+    const aprobadas = await this.justificacionRepo.countBy({
+      estado: JustificacionEstado.APROBADA,
+    });
+
+    const rechazadas = await this.justificacionRepo.countBy({
+      estado: JustificacionEstado.RECHAZADA,
+    });
 
     return {
-      presentes: resumen.presentes,
+      resumen,
 
-      ausentes: resumen.ausentes,
+      justificaciones: {
+        pendientes,
 
-      tardanzas: resumen.tardanzas,
+        aprobadas,
 
-      abandono: resumen.abandono,
+        rechazadas,
+      },
 
-      justificadas: resumen.justificadas,
+      top5: ranking.slice(0, 5),
 
-      topAusencias,
-
-      topTardanzas,
-
-      riesgo,
+      generado: new Date().toISOString(),
     };
   }
 }
