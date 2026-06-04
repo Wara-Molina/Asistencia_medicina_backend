@@ -1,3 +1,4 @@
+// src/migrations/1779745000000-AddObservacionDirector.ts 
 import { MigrationInterface, QueryRunner } from "typeorm";
 
 export class AddObservacionDirector1779745000000 implements MigrationInterface {

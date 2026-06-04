@@ -25,7 +25,9 @@ export class HorarioService {
   async obtenerPorParalelo(paraleloId: string): Promise<Horario[]> {
     return this.repository.findByParalelo(paraleloId);
   }
-
+  async obtenerPorDocente(docenteId: string): Promise<Horario[]> {
+    return this.repository.findByDocente(docenteId);
+  }
   async crear(data: unknown): Promise<Horario> {
     const body = horarioSchema.parse(data);
 

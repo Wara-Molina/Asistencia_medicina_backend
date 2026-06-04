@@ -1,3 +1,4 @@
+// src/migrations/1779745600000-AddOfflineSync.ts
 import { MigrationInterface, QueryRunner } from "typeorm";
 
 export class AddOfflineSync1779745600000 implements MigrationInterface {

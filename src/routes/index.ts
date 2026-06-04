@@ -7,7 +7,9 @@ import {
   obtenerReporteDocente,
   obtenerRanking,
   obtenerDashboardDirector,
+
 } from "../controllers/reportController";
+
 
 // Controllers
 import { login, refreshToken, logout } from "../controllers/authController";
@@ -18,7 +20,13 @@ import {
   registrarMarcado,
   marcarSalida,
   eliminarMarcado,
+  confirmarAbandono,
+  rechazarAbandono,
+  obtenerAbandonosPendientes, 
+   obtenerMarcadoActivo, 
 } from "../controllers/marcadoController";
+import controlPermanenciaRoutes
+from "./controlPermanenciaRoutes";
 import {
   getDocentes,
   getDocente,
@@ -29,6 +37,7 @@ import {
   getHorarios,
   getHorario,
   getHorariosParalelo,
+  getHorariosDocente,
   crearHorario,
   actualizarHorario,
   eliminarHorario,
@@ -114,7 +123,35 @@ marcadosRouter.put("/salida/:id", marcarSalida);
 marcadosRouter.get("/", getMarcados);
 
 marcadosRouter.post("/", registrarMarcado);
+marcadosRouter.patch(
+  "/:id/confirmar-abandono",
+  autorizar(
+    UsuarioRol.ADMIN,
+    UsuarioRol.DIRECTOR,
+  ),
+  confirmarAbandono,
+);
 
+marcadosRouter.patch(
+  "/:id/rechazar-abandono",
+  autorizar(
+    UsuarioRol.ADMIN,
+    UsuarioRol.DIRECTOR,
+  ),
+  rechazarAbandono,
+);
+marcadosRouter.get(
+  "/abandono",
+  autorizar(
+    UsuarioRol.ADMIN,
+    UsuarioRol.DIRECTOR,
+  ),
+  obtenerAbandonosPendientes,
+);
+marcadosRouter.get(
+  "/activo/:docenteId",
+  obtenerMarcadoActivo,
+);
 // genérica SIEMPRE al final
 marcadosRouter.get("/:id", getMarcado);
 
@@ -137,10 +174,10 @@ export const horariosRouter = Router();
 horariosRouter.use(autenticar);
 
 horariosRouter.get("/", getHorarios);
-
-horariosRouter.get("/:id", getHorario);
+horariosRouter.get("/docente/:id", getHorariosDocente);
 
 horariosRouter.get("/paralelo/:id", getHorariosParalelo);
+horariosRouter.get("/:id", getHorario);
 
 horariosRouter.post("/", autorizar(UsuarioRol.ADMIN), crearHorario);
 
@@ -353,4 +390,13 @@ justificacionesRouter.patch(
 
   rechazarJustificacion,
 );
-//-------------- usuarios
+
+// ─── Control Permanencia ─────────────────────────────
+export const controlPermanenciaRouter = Router();
+
+controlPermanenciaRouter.use(autenticar);
+
+controlPermanenciaRouter.use(
+  "/",
+  controlPermanenciaRoutes,
+);

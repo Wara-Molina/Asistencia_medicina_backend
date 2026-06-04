@@ -1,3 +1,4 @@
+// src/migrations/1780195000000-AddJustificadoToMarcado.ts
 import { MigrationInterface, QueryRunner } from "typeorm";
 
 export class AddJustificadoToMarcado1780196000000 implements MigrationInterface {

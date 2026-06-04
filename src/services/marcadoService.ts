@@ -82,6 +82,18 @@ export class MarcadoService {
 
   async crear(data: unknown): Promise<Marcado> {
     const body = marcadoSchema.parse(data);
+    const marcadoActivo =
+  await this.repository.findMarcadoActivo(
+    body.docenteId,
+  );
+
+if (marcadoActivo) {
+  throw new AppError(
+    400,
+    "MARCADO_ACTIVO",
+    "Ya existe una asistencia abierta",
+  );
+}
 
     const ahora = new Date();
 
@@ -149,9 +161,46 @@ export class MarcadoService {
       });
 
       if (horario) {
+        /* ==========================
+   VALIDACIÓN DÍA Y HORARIO
+========================== */
+
+        /*   Nota: si hay horarios despues de media noche modificar */
+
+        const diaActual = ahora.getDay();
+
+        const diaSistema = diaActual === 0 ? 6 : diaActual - 1;
+
+        if (horario.diaSemana !== diaSistema) {
+          throw new AppError(
+            400,
+            "DIA_INVALIDO",
+            "No existe horario asignado para el día actual",
+          );
+        }
+
         const [horaInicio, minutoInicio] = horario.horaInicio
           .split(":")
           .map(Number);
+
+        const [horaFin, minutoFin] = horario.horaFin.split(":").map(Number);
+
+        const inicioPermitido = new Date();
+        inicioPermitido.setHours(horaInicio, minutoInicio - 10, 0, 0);
+
+        const finPermitido = new Date();
+        finPermitido.setHours(horaFin, minutoFin + 10, 59, 999);
+
+        if (
+          ahora.getTime() < inicioPermitido.getTime() ||
+          ahora.getTime() > finPermitido.getTime()
+        ) {
+          throw new AppError(
+            400,
+            "FUERA_DE_HORARIO",
+            "El horario no está habilitado para registrar asistencia",
+          );
+        }
 
         const inicioProgramado = new Date();
 
@@ -177,17 +226,27 @@ export class MarcadoService {
 
           estadoAsistencia = AsistenciaEstado.TARDANZA;
         }
-
-        /* protección horario inválido */
-
-        if (minutosRetraso > 240) {
-          minutosRetraso = 0;
-
-          estadoAsistencia = AsistenciaEstado.PRESENTE;
-        }
       }
     }
+    /* ==========================
+   PREVENIR DOBLE MARCADO
+========================== */
 
+    if (body.horarioId) {
+      const marcadoExistente = await this.repository.findByDocenteHorarioFecha(
+        body.docenteId,
+        body.horarioId,
+        ahora.toISOString().split("T")[0],
+      );
+
+      if (marcadoExistente) {
+        throw new AppError(
+          409,
+          "MARCADO_DUPLICADO",
+          "Ya existe un marcado registrado para este horario",
+        );
+      }
+    }
     /* ==========================
      CREAR MARCADO
   ========================== */
@@ -385,4 +444,47 @@ export class MarcadoService {
       );
     }
   }
+
+async confirmarAbandono(
+  id: string,
+): Promise<void> {
+
+  const marcado =
+    await this.repository.confirmarAbandono(id);
+
+  if (!marcado) {
+    throw new AppError(
+      404,
+      "MARCADO_NO_ENCONTRADO",
+      "Marcado no encontrado",
+    );
+  }
+}
+
+async rechazarAbandono(
+  id: string,
+): Promise<void> {
+
+  const marcado =
+    await this.repository.rechazarAbandono(id);
+
+  if (!marcado) {
+    throw new AppError(
+      404,
+      "MARCADO_NO_ENCONTRADO",
+      "Marcado no encontrado",
+    );
+  }
+}
+async obtenerAbandonosPendientes() {
+  return this.repository.obtenerAbandonosPendientes();
+}
+
+async obtenerMarcadoActivo(
+  docenteId: string,
+) {
+  return this.repository.findMarcadoActivo(
+    docenteId,
+  );
+}
 }

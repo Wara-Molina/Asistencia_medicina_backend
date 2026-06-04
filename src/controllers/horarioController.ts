@@ -77,3 +77,15 @@ export async function eliminarHorario(
     timestamp: new Date().toISOString(),
   });
 }
+export async function getHorariosDocente(
+  req: Request,
+  res: Response,
+): Promise<void> {
+  const horarios = await horarioService.obtenerPorDocente(req.params.docenteId);
+
+  res.json({
+    status: "success",
+    data: horarios,
+    timestamp: new Date().toISOString(),
+  });
+}

@@ -1,6 +1,6 @@
 // src/controllers/marcadoController.ts
 
-import { Request, Response } from "express";
+import { Request, Response, NextFunction } from "express";
 import { MarcadoService } from "../services/marcadoService";
 
 const marcadoService = new MarcadoService();
@@ -200,4 +200,81 @@ export async function eliminarMarcado(
 
     timestamp: new Date().toISOString(),
   });
+}
+
+export async function confirmarAbandono(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
+  try {
+    await marcadoService.confirmarAbandono(
+      req.params.id,
+    );
+
+    res.json({
+      status: "success",
+      message:
+        "Abandono confirmado",
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function rechazarAbandono(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
+  try {
+    await marcadoService.rechazarAbandono(
+      req.params.id,
+    );
+
+    res.json({
+      status: "success",
+      message:
+        "Abandono rechazado",
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+ export async function obtenerAbandonosPendientes(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
+  try {
+    const data =
+      await marcadoService.obtenerAbandonosPendientes();
+
+    res.json({
+      status: "success",
+      data,
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function obtenerMarcadoActivo(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
+  try {
+    const marcado =
+      await marcadoService.obtenerMarcadoActivo(
+        req.params.docenteId,
+      );
+
+    res.json({
+      status: "success",
+      data: marcado,
+    });
+  } catch (error) {
+    next(error);
+  }
 }

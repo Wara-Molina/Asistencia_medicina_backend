@@ -49,6 +49,18 @@ export class HorarioRepository {
       },
     });
   }
+  async findByDocente(docenteId: string): Promise<Horario[]> {
+    return this.repository
+      .createQueryBuilder("horario")
+      .leftJoinAndSelect("horario.paralelo", "paralelo")
+      .leftJoinAndSelect("paralelo.materia", "materia")
+      .leftJoinAndSelect("horario.ubicacion", "ubicacion")
+      .where("paralelo.docenteId = :docenteId", {
+        docenteId,
+      })
+      .orderBy("horario.diaSemana", "ASC")
+      .getMany();
+  }
 
   async create(data: Partial<Horario>): Promise<Horario> {
     const horario = this.repository.create(data);

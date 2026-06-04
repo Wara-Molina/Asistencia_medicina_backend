@@ -16,6 +16,7 @@ import { Audit } from "../models/Audit";
 import { Sesion } from "../models/Sesion";
 import { Justificacion } from "../models/Justificacion";
 import { ObservacionDirector } from "../models/ObservacionDirector";
+import { ControlPermanencia } from "../models/ControlPermanencia";
 
 dotenv.config({
   path: path.resolve(
@@ -53,6 +54,7 @@ export const AppDataSource = new DataSource({
     Sesion,
     Justificacion,
     ObservacionDirector,
+    ControlPermanencia,
   ],
 
   migrations: [path.join(__dirname, "../migrations/*.{ts,js}")],

@@ -144,3 +144,12 @@ export const resetPasswordSchema = z.object({
 
   nuevaPassword: z.string().min(8),
 });
+
+export const controlPermanenciaSchema =
+  z.object({
+    marcadoId: z.string().uuid(),
+
+    latitud: z.number(),
+
+    longitud: z.number(),
+  });

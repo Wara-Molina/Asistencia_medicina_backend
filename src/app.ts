@@ -28,6 +28,7 @@ import {
   sesionesRouter,
   ausenciasRouter,
   cierresRouter,
+  controlPermanenciaRouter,
 } from "./routes/index";
 import { iniciarJobs } from "./jobs/attendanceJobs";
 import observacionRoutes from "./routes/observacionRoutes";
@@ -95,8 +96,12 @@ app.use(`${PREFIX}/sesiones`, sesionesRouter);
 app.use(`${PREFIX}/ausencias`, ausenciasRouter);
 app.use(`${PREFIX}/cierres`, cierresRouter);
 app.use(`${PREFIX}/sync`, syncRoutes);
-app.use("/api/justificaciones", justificacionRoutes);
+app.use(`${PREFIX}/justificaciones`, justificacionRoutes);
 app.use(`${PREFIX}/observaciones`, observacionRoutes);
+app.use(
+  `${PREFIX}/permanencia`,
+  controlPermanenciaRouter,
+);
 // ─── 404 ─────────────────────────────────────────────────────────────────────
 app.use((_req, res) => {
   res.status(404).json({

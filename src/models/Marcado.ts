@@ -4,6 +4,7 @@ import {
   PrimaryGeneratedColumn,
   Column,
   ManyToOne,
+  OneToMany,
   JoinColumn,
   CreateDateColumn,
   Index,
@@ -11,6 +12,7 @@ import {
 import { Docente } from "./Docente";
 import { Horario } from "./Horario";
 import { Ubicacion } from "./Ubicacion";
+import { ControlPermanencia } from "./ControlPermanencia";
 
 export enum TipoMarcado {
   BIOMETRICO = "biometrico",
@@ -159,4 +161,14 @@ export class Marcado {
     default: 0,
   })
   minutosTrabajados!: number;
+
+  @Column({
+  name: "abandono_confirmado",
+  type: "boolean",
+  default: false,
+})
+abandonoConfirmado!: boolean;
+
+  @OneToMany(() => ControlPermanencia, (control) => control.marcado)
+  controlesPermanencia!: ControlPermanencia[];
 }

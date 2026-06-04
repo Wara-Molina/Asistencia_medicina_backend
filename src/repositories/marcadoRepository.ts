@@ -1,6 +1,11 @@
 // src/repositories/marcadoRepository.ts
 import { AppDataSource } from "../config/database";
-import { Marcado } from "../models/Marcado";
+import {
+  Marcado,
+  MarcadoEstado,
+  AsistenciaEstado,
+} from "../models/Marcado";
+import { IsNull } from "typeorm";
 
 export class MarcadoRepository {
   private repository = AppDataSource.getRepository(Marcado);
@@ -47,6 +52,19 @@ export class MarcadoRepository {
       },
     });
   }
+  async findByDocenteHorarioFecha(
+    docenteId: string,
+    horarioId: string,
+    fecha: string,
+  ): Promise<Marcado | null> {
+    return this.repository.findOne({
+      where: {
+        docenteId,
+        horarioId,
+        fecha,
+      },
+    });
+  }
 
   async create(data: Partial<Marcado>): Promise<Marcado> {
     const marcado = this.repository.create(data);
@@ -74,4 +92,60 @@ export class MarcadoRepository {
 
     return (result.affected ?? 0) > 0;
   }
+async findMarcadoActivo(
+  docenteId: string,
+): Promise<Marcado | null> {
+  return this.repository.findOne({
+    where: {
+      docenteId,
+      horaFin: IsNull(),
+    },
+    relations: [
+      "horario",
+      "ubicacion",
+    ],
+  });
+}
+
+async confirmarAbandono(
+  id: string,
+): Promise<Marcado | null> {
+  return this.update(id, {
+    abandonoConfirmado: true,
+  });
+}
+async rechazarAbandono(
+  id: string,
+): Promise<Marcado | null> {
+  return this.update(id, {
+    abandonoConfirmado: false,
+
+    estado: MarcadoEstado.VALIDO,
+
+    estadoAsistencia:
+      AsistenciaEstado.PRESENTE,
+  });
+}
+
+async obtenerAbandonosPendientes() {
+  return this.repository.find({
+    where: {
+      estado:
+        MarcadoEstado.POSIBLE_ABANDONO,
+
+      abandonoConfirmado: false,
+    },
+
+    relations: {
+      docente: true,
+      horario: true,
+      ubicacion: true,
+    },
+
+    order: {
+      fechaCreacion: "DESC",
+    },
+  });
+}
+
 }

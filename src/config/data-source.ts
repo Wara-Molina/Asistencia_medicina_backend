@@ -1,3 +1,4 @@
+// src/config/database.ts
 import "reflect-metadata";
 
 import { DataSource } from "typeorm";
@@ -16,6 +17,7 @@ import { Usuario } from "../models/Usuario";
 import { Audit } from "../models/Audit";
 import { Sesion } from "../models/Sesion";
 import { Justificacion } from "../models/Justificacion";
+import { ControlPermanencia } from "../models/ControlPermanencia";
 
 dotenv.config({
   path: path.resolve(
@@ -52,6 +54,7 @@ const AppDataSource = new DataSource({
     Audit,
     Sesion,
     Justificacion,
+    ControlPermanencia,
   ],
 
   migrations: [path.join(__dirname, "../migrations/*.{ts,js}")],
