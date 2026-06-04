@@ -1,3 +1,4 @@
+// src/repositories/observacionRepository.ts
 import { AppDataSource } from "../config/database";
 
 import { ObservacionDirector } from "../models/ObservacionDirector";

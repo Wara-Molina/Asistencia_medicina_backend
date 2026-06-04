@@ -1,3 +1,4 @@
+// src/models/ObservacionDirector.ts
 import {
   Entity,
   PrimaryGeneratedColumn,

@@ -2,7 +2,7 @@
 
 import { AppDataSource } from "../config/database";
 
-import { Usuario } from "../models/Usuario";
+import { Usuario, UsuarioRol } from "../models/Usuario";
 
 export class UserRepository {
   private repo = AppDataSource.getRepository(Usuario);
@@ -102,4 +102,15 @@ export class UserRepository {
 
     return this.repo.save(usuario);
   }
+
+  async findDirector(): Promise<Usuario | null> {
+  return this.repo.findOne({
+    where: {
+      rol: UsuarioRol.DIRECTOR,
+      activo: true,
+    },
+  });
+}
+
+
 }

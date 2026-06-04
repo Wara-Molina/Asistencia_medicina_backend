@@ -1,3 +1,4 @@
+// src/services/controlPermanenciaService.ts
 import { AppError } from "../middlewares/errorHandler";
 import { MarcadoRepository } from "../repositories/marcadoRepository";
 import { ControlPermanenciaRepository } from "../repositories/controlPermanenciaRepository";
@@ -6,6 +7,9 @@ import {
   AsistenciaEstado,
   MarcadoEstado,
 } from "../models/Marcado";
+import { ObservacionService } from "./observacionService";
+import { UserService } from "./userService";
+import { ObservacionTipo } from "../models/ObservacionDirector";
 
 export class ControlPermanenciaService {
   private repository =
@@ -16,6 +20,12 @@ export class ControlPermanenciaService {
 
   private locationService =
     new LocationValidationService();
+
+  private observacionService =
+    new ObservacionService();
+  
+    private userService =
+  new UserService();
 
   async registrarControl(
     marcadoId: string,
@@ -60,7 +70,26 @@ if (
         "El marcado no tiene ubicación asignada",
       );
     }
+      const ultimoControl =
+  await this.repository.obtenerUltimoControl(
+    marcadoId,
+  );
+  if (ultimoControl) {
+  const diferencia =
+    Date.now() -
+    ultimoControl.fechaControl.getTime();
 
+  const minutos =
+    diferencia / 1000 / 60;
+
+  if (minutos < 5) {
+    throw new AppError(
+      400,
+      "CONTROL_RECIENTE",
+      "Ya existe un control registrado en los últimos 5 minutos",
+    );
+  }
+}
     const distancia =
       await this.locationService.distanciaMetros(
         marcado.ubicacionId,
@@ -83,28 +112,53 @@ if (
         distanciaMetros: distancia,
         dentroPerimetro,
       });
+
       const ultimos =
   await this.repository.obtenerUltimosControles(
     marcadoId,
     5,
   );
-  const abandono =
-  ultimos.length >= 5 &&
+const abandono =
+  ultimos.length === 5 &&
   ultimos.every(
     c => !c.dentroPerimetro,
   );
-  if (abandono) {
-  await this.marcadoRepository.update(
-    marcadoId,
-    {
-      estado:
-        MarcadoEstado.POSIBLE_ABANDONO,
+if (abandono) {
+ await this.marcadoRepository.update(
+  marcadoId,
+  {
+    estado:
+      MarcadoEstado.POSIBLE_ABANDONO,
 
-      estadoAsistencia:
-        AsistenciaEstado.ABANDONO,
-    },
-  );
+    estadoAsistencia:
+      AsistenciaEstado.ABANDONO,
+
+    fechaAbandono:
+      new Date(),
+  },
+);
+
+  const director =
+    await this.userService.obtenerDirector();
+
+  if (director) {
+    await this.observacionService.crear({
+      directorId: director.id,
+
+      docenteId:
+        marcado.docenteId,
+
+      tipo:
+        ObservacionTipo.ABANDONO,
+
+      descripcion:
+        `Posible abandono detectado automáticamente.
+         Distancia: ${distancia.toFixed(2)} metros.
+         Marcado: ${marcado.id}`,
+    });
+  }
 }
+
     return control;
   }
   async obtenerEvidencias(
@@ -127,4 +181,12 @@ if (
     marcadoId,
   );
 }
+async obtenerControles(
+  marcadoId: string,
+) {
+  return this.repository.findByMarcado(
+    marcadoId,
+  );
+}
+
 }

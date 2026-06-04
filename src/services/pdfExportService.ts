@@ -33,9 +33,18 @@ export class PdfExportService {
       estadoAsistencia: AsistenciaEstado.AUSENTE,
     });
 
-    const abandono = await this.marcadoRepo.countBy({
-      estado: MarcadoEstado.POSIBLE_ABANDONO,
-    });
+const abandono = await this.marcadoRepo.count({
+  where: [
+    {
+      estado:
+        MarcadoEstado.POSIBLE_ABANDONO,
+    },
+    {
+      estado:
+        MarcadoEstado.ABANDONO_CONFIRMADO,
+    },
+  ],
+});
 
     const justificadas = await this.justificacionRepo.countBy({
       estado: JustificacionEstado.APROBADA,
@@ -44,6 +53,11 @@ export class PdfExportService {
     const doc = new PDFDocument({
       margin: 50,
     });
+    const tardanzas =
+  await this.marcadoRepo.countBy({
+    estadoAsistencia:
+      AsistenciaEstado.TARDANZA,
+  });
 
     const buffers: Buffer[] = [];
 
@@ -66,7 +80,9 @@ export class PdfExportService {
     doc.fontSize(12);
 
     doc.text(`Presentes: ${presentes}`);
-
+doc.text(
+  `Tardanzas: ${tardanzas}`,
+);
     doc.text(`Ausentes: ${ausentes}`);
 
     doc.text(`Abandonos: ${abandono}`);

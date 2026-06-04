@@ -18,7 +18,9 @@ router.use(autenticar);
 router.get(
   "/",
 
-  autorizar(UsuarioRol.DIRECTOR),
+  autorizar(UsuarioRol.DIRECTOR,
+    UsuarioRol.ADMIN
+  ),
 
   obtenerObservaciones,
 );
@@ -26,7 +28,7 @@ router.get(
 router.post(
   "/",
 
-  autorizar(UsuarioRol.DIRECTOR),
+  autorizar(UsuarioRol.DIRECTOR, UsuarioRol.ADMIN),
 
   crearObservacion,
 );
@@ -34,7 +36,7 @@ router.post(
 router.patch(
   "/:id/resolver",
 
-  autorizar(UsuarioRol.DIRECTOR),
+  autorizar(UsuarioRol.DIRECTOR, UsuarioRol.ADMIN),
 
   resolverObservacion,
 );

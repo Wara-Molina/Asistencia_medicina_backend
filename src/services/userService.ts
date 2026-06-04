@@ -133,4 +133,10 @@ export class UserService {
 
     return usuario;
   }
+  async obtenerDirector() {
+  return this.repository.findDirector();
+}
+
+
+
 }

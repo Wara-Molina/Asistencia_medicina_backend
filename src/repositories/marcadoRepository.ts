@@ -110,10 +110,47 @@ async findMarcadoActivo(
 async confirmarAbandono(
   id: string,
 ): Promise<Marcado | null> {
+
+  const marcado =
+    await this.findById(id);
+
+  if (
+    !marcado ||
+    !marcado.horaInicio
+  ) {
+    return null;
+  }
+
+  const horaFin =
+    marcado.fechaAbandono ??
+    new Date();
+
+  const minutosTrabajados =
+    Math.floor(
+      (
+        horaFin.getTime() -
+        marcado.horaInicio.getTime()
+      ) /
+      1000 /
+      60,
+    );
+
   return this.update(id, {
     abandonoConfirmado: true,
+
+    estado:
+      MarcadoEstado.ABANDONO_CONFIRMADO,
+
+    estadoAsistencia:
+      AsistenciaEstado.ABANDONO,
+
+    horaFin,
+      fechaAbandono: horaFin,
+
+    minutosTrabajados,
   });
 }
+
 async rechazarAbandono(
   id: string,
 ): Promise<Marcado | null> {
@@ -124,6 +161,8 @@ async rechazarAbandono(
 
     estadoAsistencia:
       AsistenciaEstado.PRESENTE,
+
+    fechaAbandono: null,
   });
 }
 

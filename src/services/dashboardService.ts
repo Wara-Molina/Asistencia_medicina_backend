@@ -24,9 +24,13 @@ export class DashboardService {
       (m) => m.estado === MarcadoEstado.RECHAZADO,
     ).length;
 
-    const abandonos = marcados.filter(
-      (m) => m.estado === MarcadoEstado.POSIBLE_ABANDONO,
-    ).length;
+const posiblesAbandonos = marcados.filter(
+  m => m.estado === MarcadoEstado.POSIBLE_ABANDONO,
+).length;
+
+const abandonosConfirmados = marcados.filter(
+  m => m.estado === MarcadoEstado.ABANDONO_CONFIRMADO,
+).length;
 
     const porcentajeGlobal =
       marcados.length === 0
@@ -43,8 +47,7 @@ export class DashboardService {
       validos,
 
       rechazados,
-
-      abandonos,
+      abandonos: posiblesAbandonos + abandonosConfirmados,
 
       porcentajeGlobal,
     };

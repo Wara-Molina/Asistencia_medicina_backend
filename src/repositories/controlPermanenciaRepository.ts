@@ -72,4 +72,17 @@ async findByMarcadoId(
     },
   });
 }
+async obtenerUltimoControl(
+  marcadoId: string,
+): Promise<ControlPermanencia | null> {
+  return this.repository.findOne({
+    where: {
+      marcadoId,
+    },
+
+    order: {
+      fechaControl: "DESC",
+    },
+  });
+}
 }

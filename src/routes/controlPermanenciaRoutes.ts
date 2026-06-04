@@ -16,4 +16,8 @@ router.get(
   controller.obtenerEvidencias,
 );
 
+router.get(
+  "/:marcadoId",
+  controller.obtenerControles,
+);
 export default router;

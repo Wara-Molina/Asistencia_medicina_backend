@@ -389,10 +389,14 @@ if (marcadoActivo) {
 
         estadoAsistencia,
 
-        estado:
-          actual.estado === MarcadoEstado.POSIBLE_ABANDONO
-            ? MarcadoEstado.POSIBLE_ABANDONO
-            : MarcadoEstado.VALIDO,
+estado:
+  actual.estado ===
+  MarcadoEstado.ABANDONO_CONFIRMADO
+    ? MarcadoEstado.ABANDONO_CONFIRMADO
+    : actual.estado ===
+        MarcadoEstado.POSIBLE_ABANDONO
+      ? MarcadoEstado.POSIBLE_ABANDONO
+      : MarcadoEstado.VALIDO,
       },
     );
 

@@ -29,6 +29,7 @@ export enum MarcadoEstado {
   RECHAZADO = "rechazado",
 
   POSIBLE_ABANDONO = "posible_abandono",
+  ABANDONO_CONFIRMADO = "abandono_confirmado",
 }
 export enum AsistenciaEstado {
   PRESENTE = "presente",
@@ -168,6 +169,12 @@ export class Marcado {
   default: false,
 })
 abandonoConfirmado!: boolean;
+@Column({
+  name: "fecha_abandono",
+  type: "timestamptz",
+  nullable: true,
+})
+fechaAbandono!: Date | null;
 
   @OneToMany(() => ControlPermanencia, (control) => control.marcado)
   controlesPermanencia!: ControlPermanencia[];

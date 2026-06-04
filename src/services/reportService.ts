@@ -28,9 +28,18 @@ export class ReportService {
       estadoAsistencia: AsistenciaEstado.TARDANZA,
     });
 
-    const abandono = await this.marcadoRepo.countBy({
-      estado: MarcadoEstado.POSIBLE_ABANDONO,
-    });
+const abandono = await this.marcadoRepo.count({
+  where: [
+    {
+      estado:
+        MarcadoEstado.POSIBLE_ABANDONO,
+    },
+    {
+      estado:
+        MarcadoEstado.ABANDONO_CONFIRMADO,
+    },
+  ],
+});
 
     const justificadas = await this.justificacionRepo.countBy({
       estado: JustificacionEstado.APROBADA,
@@ -70,9 +79,13 @@ export class ReportService {
       (x) => x.estadoAsistencia === AsistenciaEstado.TARDANZA,
     ).length;
 
-    const abandono = marcados.filter(
-      (x) => x.estado === MarcadoEstado.POSIBLE_ABANDONO,
-    ).length;
+const abandono = marcados.filter(
+  (x) =>
+    x.estado ===
+      MarcadoEstado.POSIBLE_ABANDONO ||
+    x.estado ===
+      MarcadoEstado.ABANDONO_CONFIRMADO,
+).length;
 
     const horasTrabajadas = marcados.reduce(
       (total, item) => total + (item.minutosTrabajados || 0),
@@ -151,9 +164,14 @@ export class ReportService {
 
       actual.total++;
 
-      if (item.estadoAsistencia === AsistenciaEstado.PRESENTE) {
-        actual.presentes++;
-      }
+if (
+  item.estadoAsistencia ===
+    AsistenciaEstado.PRESENTE ||
+  item.estadoAsistencia ===
+    AsistenciaEstado.TARDANZA
+) {
+  actual.presentes++;
+}
     }
 
     const ranking = Array.from(mapa.entries()).map(([id, value]) => ({

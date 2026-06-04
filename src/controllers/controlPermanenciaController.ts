@@ -62,4 +62,23 @@ const {
     next(error);
   }
 };
+obtenerControles = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const controles =
+      await this.service.obtenerControles(
+        req.params.marcadoId,
+      );
+
+    res.json({
+      success: true,
+      data: controles,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
 }
