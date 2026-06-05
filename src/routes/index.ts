@@ -174,7 +174,10 @@ export const horariosRouter = Router();
 horariosRouter.use(autenticar);
 
 horariosRouter.get("/", getHorarios);
-horariosRouter.get("/docente/:id", getHorariosDocente);
+horariosRouter.get(
+  "/docente/:docenteId",
+  getHorariosDocente,
+);
 
 horariosRouter.get("/paralelo/:id", getHorariosParalelo);
 horariosRouter.get("/:id", getHorario);
